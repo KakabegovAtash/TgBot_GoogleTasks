@@ -1,0 +1,21 @@
+# Секреты и ключи (КРИТИЧНО)
+.env
+token.json
+credentials.json
+
+# База данных (локальные данные)
+tasks_state.db
+
+# Временные файлы и кэш Python
+__pycache__/
+*.pyc
+.DS_Store
+
+# Виртуальные окружения
+venv/
+env/
+.conda/
+
+# Тестовые скрипты (если они не нужны в репозитории)
+test_fetch.py
+test_fetch_2.py
