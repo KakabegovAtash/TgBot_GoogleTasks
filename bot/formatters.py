@@ -25,9 +25,10 @@ def format_due_date(iso_string: str) -> str:
         print(f"Ошибка парсинга даты: {e}")
         return f"🗓 Дата: {iso_string[:10]}"
 
-def format_task_message(status: str, title: str, formatted_due: str, notes: str) -> str:
+def format_task_message(status: str, title: str, formatted_due: str, notes: str, owner: str = None) -> str:
     """Форматирует сообщение о задаче."""
-    msg = f"<b>{status}:</b>\n    <i>{title}</i>"
+    prefix = f"[{owner}] " if owner else ""
+    msg = f"<b>{prefix}{status}:</b>\n    <i>{title}</i>"
     if formatted_due: 
         msg += f"\n{formatted_due}"
     if notes: 

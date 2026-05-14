@@ -1,6 +1,6 @@
 # Секреты и ключи (КРИТИЧНО)
 .env
-token.json
+*_token.json
 credentials.json
 
 # База данных (локальные данные)

@@ -5,6 +5,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from services.google_tasks import get_service
 from bot.formatters import format_week_tasks, LOCAL_TZ
+from config import ATASH_TOKEN_PATH, MOLDIR_TOKEN_PATH
 
 router = Router()
 
@@ -35,13 +36,14 @@ def fetch_weekly_tasks_sync(service, start_of_week, end_of_week):
     ).execute()
     return results.get('items', [])
 
-@router.message(Command("week"))
-async def cmd_week(message: Message):
-    """Обработчик команды /week. Присылает задачи на текущую неделю."""
+async def send_weekly_tasks(message: Message, token_path: str, next_week: bool = False):
     try:
-        service = get_service()
-        start_of_week, end_of_week = get_week_range()
-        
+        service = get_service(token_path)
+        if next_week:
+            start_of_week, end_of_week = get_next_week_range()
+        else:
+            start_of_week, end_of_week = get_week_range()
+            
         loop = asyncio.get_running_loop()
         items = await loop.run_in_executor(None, fetch_weekly_tasks_sync, service, start_of_week, end_of_week)
         
@@ -49,6 +51,16 @@ async def cmd_week(message: Message):
         await message.answer(response_text)
     except Exception as e:
         await message.answer(f"Ошибка при получении задач: {e}")
+
+@router.message(Command("a_week"))
+async def cmd_a_week(message: Message):
+    """Присылает задачи Аташа на текущую неделю."""
+    await send_weekly_tasks(message, ATASH_TOKEN_PATH)
+
+@router.message(Command("m_week"))
+async def cmd_m_week(message: Message):
+    """Присылает задачи Молдир на текущую неделю."""
+    await send_weekly_tasks(message, MOLDIR_TOKEN_PATH)
 
 def get_next_week_range():
     start_of_current, _ = get_week_range()
@@ -56,17 +68,12 @@ def get_next_week_range():
     end_of_next = start_of_next + timedelta(days=6, hours=23, minutes=59, seconds=59)
     return start_of_next, end_of_next
 
-@router.message(Command("nextweek"))
-async def cmd_nextweek(message: Message):
-    """Обработчик команды /nextweek. Присылает задачи на следующую неделю."""
-    try:
-        service = get_service()
-        start_of_week, end_of_week = get_next_week_range()
-        
-        loop = asyncio.get_running_loop()
-        items = await loop.run_in_executor(None, fetch_weekly_tasks_sync, service, start_of_week, end_of_week)
-        
-        response_text = format_week_tasks(items, start_of_week, end_of_week)
-        await message.answer(response_text)
-    except Exception as e:
-        await message.answer(f"Ошибка при получении задач: {e}")
+@router.message(Command("a_nextweek"))
+async def cmd_a_nextweek(message: Message):
+    """Присылает задачи Аташа на следующую неделю."""
+    await send_weekly_tasks(message, ATASH_TOKEN_PATH, next_week=True)
+
+@router.message(Command("m_nextweek"))
+async def cmd_m_nextweek(message: Message):
+    """Присылает задачи Молдир на следующую неделю."""
+    await send_weekly_tasks(message, MOLDIR_TOKEN_PATH, next_week=True)
